@@ -1,0 +1,4 @@
+build/
+isos/
+output-virtualbox-iso/
+*.exe
