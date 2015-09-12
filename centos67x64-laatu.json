@@ -1,0 +1,63 @@
+{
+  "variables": {
+    "iso_url": "isos\\",
+    "kickstart": "laatu-centos67x64-ks.cfg",
+    "name": "centos67x64-laatu",
+    "ssh_name": "root",
+    "ssh_pass": "centos67x64"
+  },
+
+  "builders": [{
+    "boot_command": [
+      "<esc><wait>",
+      "vmlinuz initrd=initrd.img ",
+      "ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `kickstart`}}",
+      "<enter>"
+    ],
+    "boot_wait": "10s",
+
+    "disk_size": 12288,
+    "format": "ovf",
+    "guest_additions_mode": "upload",
+    "guest_os_type": "RedHat_64",
+    "headless": false,
+
+    "iso_url": "{{user `iso_url`}}CentOS-6.7-x86_64-minimal.iso",
+    "iso_checksum": "9381a24b8bee2fed0c26896141a64b69",
+    "iso_checksum_type": "md5",
+
+    "http_directory": "public",
+    "http_port_min": 9980,
+    "http_port_max": 9980,
+
+    "ssh_username": "{{user `ssh_name`}}",
+    "ssh_password": "{{user `ssh_pass`}}",
+    "ssh_pty": true,
+    "ssh_wait_timeout": "25m",
+
+    "shutdown_command": "echo {{user `ssh_pass`}} | sudo -S shutdown -P now",
+
+    "type": "virtualbox-iso",
+
+    "vboxmanage": [
+      ["modifyvm", "{{.Name}}", "--memory", "2048"],
+      ["modifyvm", "{{.Name}}", "--vram", "32"]
+    ],
+
+    "vm_name": "{{user `name`}}"
+  }],
+
+  "post-processors": [{
+    "keep_input_artifact": true,
+    "output": "build/vagrant-{{user `name`}}.box",
+    "type": "vagrant"
+  }],
+
+  "provisioners": [{
+    "type": "shell",
+    "scripts": [
+      "configuration/rhel-vagrant.sh",
+      "configuration/centosx64-vbox-additions.sh"
+    ]
+  }]
+}
